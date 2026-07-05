@@ -11,7 +11,7 @@ struct CustomTabHostView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                Color.black.ignoresSafeArea()
+                Color.appBackground.ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     Group {

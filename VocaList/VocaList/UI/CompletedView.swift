@@ -12,6 +12,7 @@ struct CompletedView: View {
     
     // MARK: - VARIABLES
     @Environment(\.modelContext) private var context
+    @State private var showSettings = false
     
     @Query(
         filter: #Predicate<Item> { $0.isCompleted == true },
@@ -21,24 +22,30 @@ struct CompletedView: View {
     // MARK: - BODY
     var body: some View {
         ZStack {
-            Color.black
+            Color.appBackground.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 List {
                     Group {
-                        HStack(alignment: .center) {
-                            Text("VocaList")
-                                .font(.custom("Avenir", size: 32))
-                                .foregroundColor(.purple)
-                            
-                            Spacer()
-                            
-                            if !completedItemsList.isEmpty {
-                                SummaryView(count: completedItemsList.count, itemType: "completed", iconName: "checkmark.circle.fill")
+                        AppHeaderView {
+                            HStack(spacing: 12) {
+                                if !completedItemsList.isEmpty {
+                                    SummaryView(count: completedItemsList.count, itemType: "completed", iconName: "checkmark.circle.fill")
+                                }
+
+                                Button {
+                                    showSettings = true
+                                } label: {
+                                    Image(systemName: "gearshape.fill")
+                                        .font(.system(size: 22, weight: .semibold))
+                                        .foregroundColor(.purple)
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("Settings")
                             }
                         }
                         .listRowInsets(EdgeInsets())
-                        .listRowBackground(Color.black)
+                        .listRowBackground(Color.appListRowBackground)
                     }
                     
                     if completedItemsList.isEmpty {
@@ -48,7 +55,7 @@ struct CompletedView: View {
                             Text("Complete some items to see them here!")
                         }
                         .listRowInsets(EdgeInsets())
-                        .listRowBackground(Color.black)
+                        .listRowBackground(Color.appListRowBackground)
                     } else {
                         ForEach(completedItemsList) { item in
                             CompletedItemView(item: item)
@@ -63,6 +70,9 @@ struct CompletedView: View {
                 .padding(.bottom, 60)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
         }
     }
     

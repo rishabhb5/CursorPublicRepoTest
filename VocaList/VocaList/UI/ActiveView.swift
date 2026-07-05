@@ -10,6 +10,7 @@ struct ActiveView: View {
     // Insert, Delete, Save (CRUD operations)
     @Environment(\.modelContext) private var context
     @StateObject var whisperState = WhisperState()
+    @State private var showSettings = false
     
     // var alItemList: Fetches data from the DB, updates UI reactively when data changes
     // // Querying all Items
@@ -23,43 +24,48 @@ struct ActiveView: View {
     
     var body: some View {
         ZStack {
-            // Black background
-            Color.black.ignoresSafeArea()
+            Color.appBackground.ignoresSafeArea()
             
             VStack(spacing: 0) {
                 
                 List {
                     Group {
-                        HStack(alignment: .center) {
-                            Text("VocaList")
-                                .font(.custom("Avenir", size: 32))
-                                .foregroundColor(.purple)
-                            
-                            Spacer()
-                            
-                            if !activeItemsList.isEmpty {
-                                SummaryView(count: activeItemsList.count, itemType: "active", iconName: "bolt.fill")
+                        AppHeaderView {
+                            HStack(spacing: 12) {
+                                if !activeItemsList.isEmpty {
+                                    SummaryView(count: activeItemsList.count, itemType: "active", iconName: "bolt.fill")
+                                }
+
+                                Button {
+                                    showSettings = true
+                                } label: {
+                                    Image(systemName: "gearshape.fill")
+                                        .font(.system(size: 22, weight: .semibold))
+                                        .foregroundColor(.purple)
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("Settings")
                             }
                         }
                     }
                     .listRowInsets(EdgeInsets())
-                    .listRowBackground(Color.black)
+                    .listRowBackground(Color.appListRowBackground)
                     
                     if activeItemsList.isEmpty {
                         ContentUnavailableView {
                             Label("No Active Items", systemImage: "checklist")
                                 .listRowInsets(EdgeInsets())
-                                .listRowBackground(Color.black)
+                                .listRowBackground(Color.appListRowBackground)
                         } description: {
                             Text("Click '+' to add a new item or check check Completed tab")
                                 .listRowInsets(EdgeInsets())
-                                .listRowBackground(Color.black)
+                                .listRowBackground(Color.appListRowBackground)
                         }
                     } else {
                         ForEach(activeItemsList) { item in
                             ActiveItemView(item: item)
                                 .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
-                                .listRowBackground(Color.black)
+                                .listRowBackground(Color.appListRowBackground)
                         }
                         .onDelete(perform: deleteItem) // Swift handles the index (no need to pass in)
                         .onMove(perform: moveItem) // Swift handles the index (no need to pass in)
@@ -84,6 +90,9 @@ struct ActiveView: View {
                         .padding(.bottom, 80)
                 }
             }
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
         }
         .onAppear {
             cleanupExistingItems()
@@ -168,4 +177,3 @@ struct ActiveView: View {
     } /* moveItem() */
     
 } /* ActiveView */
-

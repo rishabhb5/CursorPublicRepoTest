@@ -20,7 +20,7 @@ struct ActiveItemView: View {
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
             Text(item.title)
-                .foregroundColor(.white)
+                .foregroundColor(.appPrimaryText)
                 .font(.custom("Avenir", size: 16))
                 .lineLimit(6)
                 .multilineTextAlignment(.leading)
@@ -58,8 +58,8 @@ struct ActiveItemView: View {
             // Card gradient background
             LinearGradient(
                 gradient: Gradient(colors: [
-                    Color(red: 0.12, green: 0.12, blue: 0.12), // #1f1f1f
-                    Color(red: 0.29, green: 0.17, blue: 0.35)  // #4a2c5a
+                    Color.appCardGradientTop,
+                    Color.appCardGradientBottom
                 ]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -84,7 +84,7 @@ struct ActiveItemView: View {
         .listRowBackground(Color.clear) // Remove default row background
         .listRowSeparator(.visible) // Show separators
         .listSectionSeparator(.hidden) // Hide section separators if any
-        .listRowSeparatorTint(Color.black) // Black separator
+        .listRowSeparatorTint(Color.appListSeparator)
         .scaleEffect(1.0)
         .animation(.easeInOut(duration: 0.2), value: false) // For hover-like effects
         .swipeActions(edge: .leading, allowsFullSwipe: true) {
