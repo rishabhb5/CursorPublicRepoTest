@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum AppearanceMode: String, CaseIterable, Identifiable {
+enum AppearanceMode: String, CaseIterable, Identifiable, Hashable {
     case dark
     case light
     case system

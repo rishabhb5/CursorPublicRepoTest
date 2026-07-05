@@ -5,20 +5,13 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
 
-    @AppStorage(SettingsKeys.appearanceMode) private var appearanceModeRaw = AppearanceMode.dark.rawValue
+    @AppStorage(SettingsKeys.appearanceMode) private var appearanceMode = AppearanceMode.dark
 
     @Query(filter: #Predicate<Item> { $0.isCompleted == true })
     private var completedItems: [Item]
 
     @State private var showClearConfirmation = false
     @State private var showClearSuccess = false
-
-    private var appearanceModeBinding: Binding<AppearanceMode> {
-        Binding(
-            get: { AppearanceMode(rawValue: appearanceModeRaw) ?? .dark },
-            set: { appearanceModeRaw = $0.rawValue }
-        )
-    }
 
     private var appVersion: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
@@ -30,7 +23,7 @@ struct SettingsView: View {
         NavigationView {
             Form {
                 Section("Appearance") {
-                    Picker("Theme", selection: appearanceModeBinding) {
+                    Picker("Theme", selection: $appearanceMode) {
                         ForEach(AppearanceMode.allCases) { mode in
                             Text(mode.label).tag(mode)
                         }
