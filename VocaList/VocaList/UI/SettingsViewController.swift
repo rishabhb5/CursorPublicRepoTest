@@ -33,7 +33,6 @@ final class SettingsViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureTableView()
-        configureHeader()
         refreshCompletedItemCount()
     }
 
@@ -51,30 +50,10 @@ final class SettingsViewController: UITableViewController {
         tableView.separatorColor = .separator
         tableView.contentInset.bottom = 60
         tableView.verticalScrollIndicatorInsets.bottom = 60
+        tableView.sectionHeaderTopPadding = 0
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "ThemeCell")
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "ClearCell")
-    }
-
-    private func configureHeader() {
-        let headerContainer = UIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 72))
-        headerContainer.backgroundColor = .appBackground
-
-        let titleLabel = UILabel()
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = "VocaList"
-        titleLabel.font = UIFont(name: "Avenir-Heavy", size: 32) ?? UIFont.systemFont(ofSize: 32, weight: .heavy)
-        titleLabel.textColor = .appPurple
-        headerContainer.addSubview(titleLabel)
-
-        NSLayoutConstraint.activate([
-            titleLabel.leadingAnchor.constraint(equalTo: headerContainer.leadingAnchor, constant: 20),
-            titleLabel.trailingAnchor.constraint(equalTo: headerContainer.trailingAnchor, constant: -20),
-            titleLabel.bottomAnchor.constraint(equalTo: headerContainer.bottomAnchor, constant: -8),
-        ])
-
-        tableView.tableHeaderView = headerContainer
-        tableView.tableHeaderView?.frame.size.height = 72
     }
 
     // MARK: - Data
