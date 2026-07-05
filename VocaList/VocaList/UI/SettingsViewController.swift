@@ -1,4 +1,5 @@
 import UIKit
+import SwiftUI
 import SwiftData
 
 final class SettingsViewController: UITableViewController {
@@ -19,6 +20,11 @@ final class SettingsViewController: UITableViewController {
     private let modelContext: ModelContext
     private var completedItemCount = 0
     private var themeSegmentedControl: UISegmentedControl?
+    private let headerHostingController = UIHostingController(
+        rootView: AppHeaderView()
+            .padding(.horizontal, 20)
+            .padding(.vertical, 4)
+    )
 
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
@@ -33,7 +39,13 @@ final class SettingsViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureTableView()
+        configureHeader()
         refreshCompletedItemCount()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        updateHeaderSize()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -54,6 +66,30 @@ final class SettingsViewController: UITableViewController {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "ThemeCell")
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "ClearCell")
+    }
+
+    private func configureHeader() {
+        headerHostingController.view.backgroundColor = .appBackground
+        updateHeaderSize()
+    }
+
+    private func updateHeaderSize() {
+        guard let headerView = headerHostingController.view else { return }
+        let width = tableView.bounds.width
+        guard width > 0 else { return }
+
+        headerView.frame = CGRect(x: 0, y: 0, width: width, height: 0)
+        let targetSize = CGSize(width: width, height: UIView.layoutFittingCompressedSize.height)
+        let height = headerView.systemLayoutSizeFitting(
+            targetSize,
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        ).height
+
+        if tableView.tableHeaderView !== headerView || headerView.frame.height != height {
+            headerView.frame = CGRect(x: 0, y: 0, width: width, height: height)
+            tableView.tableHeaderView = headerView
+        }
     }
 
     // MARK: - Data

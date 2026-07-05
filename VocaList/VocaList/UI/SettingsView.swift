@@ -7,20 +7,8 @@ struct SettingsView: View {
     var body: some View {
         ZStack {
             Color.appBackground.ignoresSafeArea()
-
-            VStack(spacing: 0) {
-                List {
-                    AppHeaderView()
-                        .listRowInsets(EdgeInsets())
-                        .listRowBackground(Color.appListRowBackground)
-                }
-                .scrollContentBackground(.hidden)
-                .scrollDisabled(true)
-                .fixedSize(horizontal: false, vertical: true)
+            SettingsTableViewController(modelContext: modelContext)
                 .padding(.top, -40)
-
-                SettingsTableViewController(modelContext: modelContext)
-            }
         }
     }
 }
