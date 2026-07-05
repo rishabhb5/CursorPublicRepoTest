@@ -10,5 +10,11 @@ struct MainTabView: View {
     var body: some View {
         CustomTabHostView()
             .preferredColorScheme(appearanceMode.colorScheme)
+            .onReceive(NotificationCenter.default.publisher(for: .appearanceModeDidChange)) { _ in
+                if let rawValue = UserDefaults.standard.string(forKey: SettingsKeys.appearanceMode),
+                   let mode = AppearanceMode(rawValue: rawValue) {
+                    appearanceMode = mode
+                }
+            }
     }
 }

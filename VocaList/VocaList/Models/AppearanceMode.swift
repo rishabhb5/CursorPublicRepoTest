@@ -27,3 +27,7 @@ enum AppearanceMode: String, CaseIterable, Identifiable, Hashable {
 enum SettingsKeys {
     static let appearanceMode = "appearanceMode"
 }
+
+extension Notification.Name {
+    static let appearanceModeDidChange = Notification.Name("appearanceModeDidChange")
+}
