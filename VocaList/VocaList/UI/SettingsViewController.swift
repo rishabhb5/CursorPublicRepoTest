@@ -40,23 +40,26 @@ final class SettingsViewController: UITableViewController {
         refreshCompletedItemCount()
     }
 
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        updateHeaderSize()
-    }
-
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: false)
         refreshCompletedItemCount()
         updateThemeSegmentSelection()
         tableView.reloadData()
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        updateHeaderSizeIfNeeded()
+    }
+
     // MARK: - Setup
 
     private func configureTableView() {
+        view.backgroundColor = .appBackground
         tableView.backgroundColor = .appBackground
         tableView.separatorColor = .separator
+        tableView.contentInset.top = -40
         tableView.contentInset.bottom = 60
         tableView.verticalScrollIndicatorInsets.bottom = 60
         tableView.sectionHeaderTopPadding = 0
@@ -67,23 +70,25 @@ final class SettingsViewController: UITableViewController {
 
     private func configureHeader() {
         headerHostingController.view.backgroundColor = .appBackground
-        updateHeaderSize()
+        updateHeaderSizeIfNeeded()
     }
 
-    private func updateHeaderSize() {
+    private func updateHeaderSizeIfNeeded() {
         guard let headerView = headerHostingController.view else { return }
         let width = tableView.bounds.width
         guard width > 0 else { return }
 
-        headerView.frame = CGRect(x: 0, y: 0, width: width, height: 0)
         let targetSize = CGSize(width: width, height: UIView.layoutFittingCompressedSize.height)
+        headerView.frame.size = CGSize(width: width, height: 1)
         let height = headerView.systemLayoutSizeFitting(
             targetSize,
             withHorizontalFittingPriority: .required,
             verticalFittingPriority: .fittingSizeLevel
         ).height
 
-        if tableView.tableHeaderView !== headerView || headerView.frame.height != height {
+        guard height > 0 else { return }
+
+        if tableView.tableHeaderView !== headerView || abs(headerView.frame.height - height) > 0.5 {
             headerView.frame = CGRect(x: 0, y: 0, width: width, height: height)
             tableView.tableHeaderView = headerView
         }

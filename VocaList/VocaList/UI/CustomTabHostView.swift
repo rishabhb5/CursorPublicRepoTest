@@ -27,9 +27,8 @@ struct CustomTabHostView: View {
                                 .transition(tabTransition(for: .settings))
                         }
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .animation(.spring(response: 0.4, dampingFraction: 0.7, blendDuration: 0), value: selectedTab)
-                    .padding(.top, 0)
-                    Spacer()
                 }
 
                 VStack {

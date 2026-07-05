@@ -5,11 +5,10 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
 
     var body: some View {
-        ZStack {
-            Color.appBackground.ignoresSafeArea()
-            SettingsTableViewController(modelContext: modelContext)
-                .padding(.top, -40)
-        }
+        SettingsTableViewController(modelContext: modelContext)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.appBackground)
+            .ignoresSafeArea()
     }
 }
 
