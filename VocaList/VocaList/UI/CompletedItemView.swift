@@ -19,7 +19,7 @@ struct CompletedItemView: View {
         HStack(alignment: .top, spacing: 12) {
             Text(item.title)
                 .strikethrough(item.isCompleted)
-                .foregroundColor(.gray)
+                .foregroundColor(.appSecondaryText)
                 .font(.custom("Avenir", size: 16))
                 .lineLimit(6)
                 .multilineTextAlignment(.leading)
@@ -55,8 +55,8 @@ struct CompletedItemView: View {
         .background(
             LinearGradient(
                 gradient: Gradient(colors: [
-                    Color(red: 0.12, green: 0.12, blue: 0.12),
-                    Color(red: 0.29, green: 0.17, blue: 0.35)
+                    Color.appCardGradientTop,
+                    Color.appCardGradientBottom
                 ]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -80,7 +80,7 @@ struct CompletedItemView: View {
         .listRowBackground(Color.clear)
         .listRowSeparator(.visible)
         .listSectionSeparator(.hidden)
-        .listRowSeparatorTint(Color.black)
+        .listRowSeparatorTint(Color.appListSeparator)
         .scaleEffect(1.0)
     } /* body View*/
 } /* CompletedItemView */
