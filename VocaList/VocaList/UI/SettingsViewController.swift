@@ -2,7 +2,7 @@ import UIKit
 import SwiftUI
 import SwiftData
 
-final class SettingsViewController: UITableViewController {
+final class SettingsViewController: UIViewController {
     private enum Section: Int, CaseIterable {
         case appearance
         case data
@@ -18,14 +18,16 @@ final class SettingsViewController: UITableViewController {
     }
 
     private let modelContext: ModelContext
+    private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private var completedItemCount = 0
     private var themeSegmentedControl: UISegmentedControl?
     private let headerHostingController: UIHostingController<SettingsHeaderView>
+    private var lastHeaderHeight: CGFloat = 0
 
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
         self.headerHostingController = UIHostingController(rootView: SettingsHeaderView())
-        super.init(style: .insetGrouped)
+        super.init(nibName: nil, bundle: nil)
     }
 
     @available(*, unavailable)
@@ -42,7 +44,6 @@ final class SettingsViewController: UITableViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: false)
         refreshCompletedItemCount()
         updateThemeSegmentSelection()
         tableView.reloadData()
@@ -57,8 +58,12 @@ final class SettingsViewController: UITableViewController {
 
     private func configureTableView() {
         view.backgroundColor = .appBackground
+
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.backgroundColor = .appBackground
         tableView.separatorColor = .separator
+        tableView.dataSource = self
+        tableView.delegate = self
         tableView.contentInset.top = -40
         tableView.contentInset.bottom = 60
         tableView.verticalScrollIndicatorInsets.bottom = 60
@@ -66,6 +71,14 @@ final class SettingsViewController: UITableViewController {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "ThemeCell")
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "ClearCell")
+
+        view.addSubview(tableView)
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: view.topAnchor),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
     }
 
     private func configureHeader() {
@@ -78,20 +91,18 @@ final class SettingsViewController: UITableViewController {
         let width = tableView.bounds.width
         guard width > 0 else { return }
 
-        let targetSize = CGSize(width: width, height: UIView.layoutFittingCompressedSize.height)
         headerView.frame.size = CGSize(width: width, height: 1)
         let height = headerView.systemLayoutSizeFitting(
-            targetSize,
+            CGSize(width: width, height: UIView.layoutFittingCompressedSize.height),
             withHorizontalFittingPriority: .required,
             verticalFittingPriority: .fittingSizeLevel
         ).height
 
-        guard height > 0 else { return }
+        guard height > 0, abs(lastHeaderHeight - height) > 0.5 || tableView.tableHeaderView !== headerView else { return }
 
-        if tableView.tableHeaderView !== headerView || abs(headerView.frame.height - height) > 0.5 {
-            headerView.frame = CGRect(x: 0, y: 0, width: width, height: height)
-            tableView.tableHeaderView = headerView
-        }
+        lastHeaderHeight = height
+        headerView.frame = CGRect(x: 0, y: 0, width: width, height: height)
+        tableView.tableHeaderView = headerView
     }
 
     // MARK: - Data
@@ -176,39 +187,7 @@ final class SettingsViewController: UITableViewController {
         saveAppearanceMode(AppearanceMode.allCases[index])
     }
 
-    // MARK: - UITableViewDataSource
-
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        Section.allCases.count
-    }
-
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        switch Section(rawValue: section)! {
-        case .appearance: return 1
-        case .data: return 1
-        case .about: return 1
-        }
-    }
-
-    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        Section(rawValue: section)?.title
-    }
-
-    override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
-        guard Section(rawValue: section) == .about else { return nil }
-        return "Transcription runs entirely on-device. Your voice recordings and tasks are stored locally on this device."
-    }
-
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        switch Section(rawValue: indexPath.section)! {
-        case .appearance:
-            return themeCell(for: tableView, at: indexPath)
-        case .data:
-            return clearCompletedCell(for: tableView, at: indexPath)
-        case .about:
-            return versionCell(for: tableView, at: indexPath)
-        }
-    }
+    // MARK: - Cells
 
     private func themeCell(for tableView: UITableView, at indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ThemeCell", for: indexPath)
@@ -247,15 +226,13 @@ final class SettingsViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ClearCell", for: indexPath)
         var content = cell.defaultContentConfiguration()
         content.text = "Clear Completed Items"
-        content.textProperties.color = .systemRed
+        content.textProperties.color = completedItemCount == 0 ? .systemRed.withAlphaComponent(0.4) : .systemRed
         content.secondaryText = completedItemsCountLabel
         content.secondaryTextProperties.color = .secondaryLabel
         cell.contentConfiguration = content
         cell.backgroundColor = .appListRowBackground
         cell.selectionStyle = completedItemCount == 0 ? .none : .default
         cell.isUserInteractionEnabled = completedItemCount > 0
-        content.textProperties.color = completedItemCount == 0 ? .systemRed.withAlphaComponent(0.4) : .systemRed
-        cell.contentConfiguration = content
         return cell
     }
 
@@ -270,10 +247,44 @@ final class SettingsViewController: UITableViewController {
         cell.selectionStyle = .none
         return cell
     }
+}
 
-    // MARK: - UITableViewDelegate
+// MARK: - UITableViewDataSource
 
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+extension SettingsViewController: UITableViewDataSource {
+    func numberOfSections(in tableView: UITableView) -> Int {
+        Section.allCases.count
+    }
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        1
+    }
+
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        Section(rawValue: section)?.title
+    }
+
+    func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        guard Section(rawValue: section) == .about else { return nil }
+        return "Transcription runs entirely on-device. Your voice recordings and tasks are stored locally on this device."
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        switch Section(rawValue: indexPath.section)! {
+        case .appearance:
+            return themeCell(for: tableView, at: indexPath)
+        case .data:
+            return clearCompletedCell(for: tableView, at: indexPath)
+        case .about:
+            return versionCell(for: tableView, at: indexPath)
+        }
+    }
+}
+
+// MARK: - UITableViewDelegate
+
+extension SettingsViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         guard Section(rawValue: indexPath.section) == .data, completedItemCount > 0 else { return }
         presentClearConfirmation()

@@ -5,14 +5,12 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
 
     var body: some View {
-        SettingsTableViewController(modelContext: modelContext)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.appBackground)
+        SettingsViewControllerRepresentable(modelContext: modelContext)
             .ignoresSafeArea()
     }
 }
 
-private struct SettingsTableViewController: UIViewControllerRepresentable {
+private struct SettingsViewControllerRepresentable: UIViewControllerRepresentable {
     let modelContext: ModelContext
 
     func makeUIViewController(context: Context) -> SettingsViewController {
