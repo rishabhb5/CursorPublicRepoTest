@@ -20,14 +20,11 @@ final class SettingsViewController: UITableViewController {
     private let modelContext: ModelContext
     private var completedItemCount = 0
     private var themeSegmentedControl: UISegmentedControl?
-    private let headerHostingController = UIHostingController(
-        rootView: AppHeaderView()
-            .padding(.horizontal, 20)
-            .padding(.vertical, 4)
-    )
+    private let headerHostingController: UIHostingController<SettingsHeaderView>
 
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
+        self.headerHostingController = UIHostingController(rootView: SettingsHeaderView())
         super.init(style: .insetGrouped)
     }
 
@@ -275,5 +272,13 @@ final class SettingsViewController: UITableViewController {
         tableView.deselectRow(at: indexPath, animated: true)
         guard Section(rawValue: indexPath.section) == .data, completedItemCount > 0 else { return }
         presentClearConfirmation()
+    }
+}
+
+private struct SettingsHeaderView: View {
+    var body: some View {
+        AppHeaderView()
+            .padding(.horizontal, 20)
+            .padding(.vertical, 4)
     }
 }
