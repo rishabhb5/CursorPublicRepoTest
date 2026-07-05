@@ -12,7 +12,6 @@ struct CompletedView: View {
     
     // MARK: - VARIABLES
     @Environment(\.modelContext) private var context
-    @State private var showSettings = false
     
     @Query(
         filter: #Predicate<Item> { $0.isCompleted == true },
@@ -28,20 +27,8 @@ struct CompletedView: View {
                 List {
                     Group {
                         AppHeaderView {
-                            HStack(spacing: 12) {
-                                if !completedItemsList.isEmpty {
-                                    SummaryView(count: completedItemsList.count, itemType: "completed", iconName: "checkmark.circle.fill")
-                                }
-
-                                Button {
-                                    showSettings = true
-                                } label: {
-                                    Image(systemName: "gearshape.fill")
-                                        .font(.system(size: 22, weight: .semibold))
-                                        .foregroundColor(.purple)
-                                }
-                                .buttonStyle(.plain)
-                                .accessibilityLabel("Settings")
+                            if !completedItemsList.isEmpty {
+                                SummaryView(count: completedItemsList.count, itemType: "completed", iconName: "checkmark.circle.fill")
                             }
                         }
                         .listRowInsets(EdgeInsets())
@@ -70,9 +57,6 @@ struct CompletedView: View {
                 .padding(.bottom, 60)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
-        }
-        .sheet(isPresented: $showSettings) {
-            SettingsView()
         }
     }
     
