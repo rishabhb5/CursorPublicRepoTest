@@ -13,6 +13,13 @@ struct SettingsView: View {
     @State private var showClearConfirmation = false
     @State private var showClearSuccess = false
 
+    private var appearanceModeBinding: Binding<AppearanceMode> {
+        Binding(
+            get: { AppearanceMode(rawValue: appearanceModeRaw) ?? .dark },
+            set: { appearanceModeRaw = $0.rawValue }
+        )
+    }
+
     private var appVersion: String {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
@@ -23,10 +30,7 @@ struct SettingsView: View {
         NavigationView {
             Form {
                 Section("Appearance") {
-                    Picker("Theme", selection: Binding(
-                        get: { appearanceMode },
-                        set: { appearanceModeRaw = $0.rawValue }
-                    )) {
+                    Picker("Theme", selection: appearanceModeBinding) {
                         ForEach(AppearanceMode.allCases) { mode in
                             Text(mode.label).tag(mode)
                         }
