@@ -10,7 +10,6 @@ struct ActiveView: View {
     // Insert, Delete, Save (CRUD operations)
     @Environment(\.modelContext) private var context
     @StateObject var whisperState = WhisperState()
-    @State private var showSettings = false
     
     // var alItemList: Fetches data from the DB, updates UI reactively when data changes
     // // Querying all Items
@@ -31,20 +30,8 @@ struct ActiveView: View {
                 List {
                     Group {
                         AppHeaderView {
-                            HStack(spacing: 12) {
-                                if !activeItemsList.isEmpty {
-                                    SummaryView(count: activeItemsList.count, itemType: "active", iconName: "bolt.fill")
-                                }
-
-                                Button {
-                                    showSettings = true
-                                } label: {
-                                    Image(systemName: "gearshape.fill")
-                                        .font(.system(size: 22, weight: .semibold))
-                                        .foregroundColor(.purple)
-                                }
-                                .buttonStyle(.plain)
-                                .accessibilityLabel("Settings")
+                            if !activeItemsList.isEmpty {
+                                SummaryView(count: activeItemsList.count, itemType: "active", iconName: "bolt.fill")
                             }
                         }
                     }
@@ -90,9 +77,6 @@ struct ActiveView: View {
                         .padding(.bottom, 80)
                 }
             }
-        }
-        .sheet(isPresented: $showSettings) {
-            SettingsView()
         }
         .onAppear {
             cleanupExistingItems()

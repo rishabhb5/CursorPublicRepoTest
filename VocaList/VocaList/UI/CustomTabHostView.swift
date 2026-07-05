@@ -2,8 +2,8 @@ import SwiftUI
 
 // Host view for custom pill-shaped, hovering tab bar
 struct CustomTabHostView: View {
-    enum Tab {
-        case active, completed
+    enum Tab: CaseIterable {
+        case active, completed, settings
     }
     
     @State private var selectedTab: Tab = .active
@@ -15,18 +15,16 @@ struct CustomTabHostView: View {
 
                 VStack(spacing: 0) {
                     Group {
-                        if selectedTab == .active {
+                        switch selectedTab {
+                        case .active:
                             ActiveView()
-                                .transition(.asymmetric(
-                                    insertion: .move(edge: .leading).combined(with: .opacity),
-                                    removal: .move(edge: .leading).combined(with: .opacity)
-                                ))
-                        } else {
+                                .transition(tabTransition(for: .active))
+                        case .completed:
                             CompletedView()
-                                .transition(.asymmetric(
-                                    insertion: .move(edge: .trailing).combined(with: .opacity),
-                                    removal: .move(edge: .trailing).combined(with: .opacity)
-                                ))
+                                .transition(tabTransition(for: .completed))
+                        case .settings:
+                            SettingsView()
+                                .transition(tabTransition(for: .settings))
                         }
                     }
                     .animation(.spring(response: 0.4, dampingFraction: 0.7, blendDuration: 0), value: selectedTab)
@@ -39,13 +37,14 @@ struct CustomTabHostView: View {
                     HStack(spacing: 0) {
                         tabButton(title: "Active", icon: "bolt.fill", tab: .active, color: .purple)
                         tabButton(title: "Completed", icon: "checkmark.circle.fill", tab: .completed, color: .green)
+                        tabButton(title: "Settings", icon: "gearshape.fill", tab: .settings, color: .gray)
                     }
                     .background(
                         Capsule()
                             .fill(Color(.darkGray).opacity(0.93))
                             .shadow(color: Color.purple.opacity(0.25), radius: 8, y: 2)
                     )
-                    .padding(.horizontal, 60)
+                    .padding(.horizontal, 28)
                     .frame(height: 56)
                     .frame(maxWidth: .infinity)
                     .zIndex(2)
@@ -55,6 +54,21 @@ struct CustomTabHostView: View {
                 }
             }
             .navigationBarHidden(true)
+        }
+    }
+
+    private func tabTransition(for tab: Tab) -> AnyTransition {
+        switch tab {
+        case .active:
+            return .asymmetric(
+                insertion: .move(edge: .leading).combined(with: .opacity),
+                removal: .move(edge: .leading).combined(with: .opacity)
+            )
+        case .completed, .settings:
+            return .asymmetric(
+                insertion: .move(edge: .trailing).combined(with: .opacity),
+                removal: .move(edge: .trailing).combined(with: .opacity)
+            )
         }
     }
 
@@ -71,7 +85,7 @@ struct CustomTabHostView: View {
                     .font(.system(size: 20, weight: .semibold, design: .rounded))
             }
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 12)
             .padding(.vertical, 10)
             .contentShape(Rectangle())
             .foregroundColor(selectedTab == tab ? color : .gray)
@@ -84,5 +98,6 @@ struct CustomTabHostView: View {
             .animation(.easeInOut(duration: 0.2), value: selectedTab)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(title)
     }
 }

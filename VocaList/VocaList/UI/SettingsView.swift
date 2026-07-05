@@ -2,7 +2,6 @@ import SwiftUI
 import SwiftData
 
 struct SettingsView: View {
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var context
 
     @AppStorage(SettingsKeys.appearanceMode) private var appearanceMode = AppearanceMode.dark
@@ -20,67 +19,71 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        NavigationView {
-            Form {
-                Section("Appearance") {
-                    Picker("Theme", selection: $appearanceMode) {
-                        ForEach(AppearanceMode.allCases) { mode in
-                            Text(mode.label).tag(mode)
-                        }
+        ZStack {
+            Color.appBackground.ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                List {
+                    Group {
+                        AppHeaderView()
                     }
-                    .pickerStyle(.segmented)
+                    .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.appListRowBackground)
-                }
 
-                Section("Data") {
-                    Button(role: .destructive) {
-                        showClearConfirmation = true
-                    } label: {
-                        HStack {
-                            Text("Clear Completed Items")
-                            Spacer()
-                            Text(completedItemsCountLabel)
-                                .foregroundColor(.secondary)
+                    Section("Appearance") {
+                        Picker("Theme", selection: $appearanceMode) {
+                            ForEach(AppearanceMode.allCases) { mode in
+                                Text(mode.label).tag(mode)
+                            }
                         }
-                    }
-                    .disabled(completedItems.isEmpty)
-                    .listRowBackground(Color.appListRowBackground)
-                }
-
-                Section("About") {
-                    LabeledContent("Version", value: appVersion)
+                        .pickerStyle(.segmented)
                         .listRowBackground(Color.appListRowBackground)
+                    }
 
-                    Text("Transcription runs entirely on-device. Your voice recordings and tasks are stored locally on this device.")
-                        .font(.footnote)
-                        .foregroundColor(.secondary)
+                    Section("Data") {
+                        Button(role: .destructive) {
+                            showClearConfirmation = true
+                        } label: {
+                            HStack {
+                                Text("Clear Completed Items")
+                                Spacer()
+                                Text(completedItemsCountLabel)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .disabled(completedItems.isEmpty)
                         .listRowBackground(Color.appListRowBackground)
-                }
-            }
-            .scrollContentBackground(.hidden)
-            .background(Color.appBackground)
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
-                        dismiss()
+                    }
+
+                    Section("About") {
+                        LabeledContent("Version", value: appVersion)
+                            .listRowBackground(Color.appListRowBackground)
+
+                        Text("Transcription runs entirely on-device. Your voice recordings and tasks are stored locally on this device.")
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                            .listRowBackground(Color.appListRowBackground)
                     }
                 }
+                .background(Color.clear)
+                .padding(.top, -40)
+                .scrollContentBackground(.hidden)
+                .padding(.bottom, 60)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
-            .alert("Clear Completed Items?", isPresented: $showClearConfirmation) {
-                Button("Cancel", role: .cancel) {}
-                Button("Clear All", role: .destructive) {
-                    clearAllCompletedItems()
-                }
-            } message: {
-                Text("This will permanently delete \(completedItems.count) completed item\(completedItems.count == 1 ? "" : "s").")
+        }
+        .alert("Clear Completed Items?", isPresented: $showClearConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Clear All", role: .destructive) {
+                clearAllCompletedItems()
             }
-            .alert("Completed Items Cleared", isPresented: $showClearSuccess) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text("All completed items have been removed.")
-            }
+        } message: {
+            Text("This will permanently delete \(completedItems.count) completed item\(completedItems.count == 1 ? "" : "s").")
+        }
+        .alert("Completed Items Cleared", isPresented: $showClearSuccess) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("All completed items have been removed.")
         }
     }
 
